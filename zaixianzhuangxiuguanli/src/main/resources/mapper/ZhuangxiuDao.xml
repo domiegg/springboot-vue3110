@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhuangxiuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zhuangxiu_uuid_number as zhuangxiuUuidNumber
+        ,a.tuandui_id as tuanduiId
+        ,a.zhuangxiu_name as zhuangxiuName
+        ,a.zhuangxiu_photo as zhuangxiuPhoto
+        ,a.zhuangxiu_types as zhuangxiuTypes
+        ,a.zhuangxiu_new_money as zhuangxiuNewMoney
+        ,a.zhuangxiu_clicknum as zhuangxiuClicknum
+        ,a.zhuangxiu_content as zhuangxiuContent
+        ,a.shangxia_types as shangxiaTypes
+        ,a.zhuangxiu_delete as zhuangxiuDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhuangxiuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,tuandui.tuandui_name as tuanduiName
+        ,tuandui.tuandui_photo as tuanduiPhoto
+        ,tuandui.tuandui_phone as tuanduiPhone
+        ,tuandui.tuandui_email as tuanduiEmail
+        ,tuandui.tuandui_content as tuanduiContent
+        ,tuandui.tuandui_delete as tuanduiDelete
+
+        FROM zhuangxiu  a
+        left JOIN tuandui tuandui ON a.tuandui_id = tuandui.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.zhuangxiuUuidNumber != '' and params.zhuangxiuUuidNumber != null and params.zhuangxiuUuidNumber != 'null' ">
+                and a.zhuangxiu_uuid_number like CONCAT('%',#{params.zhuangxiuUuidNumber},'%')
+            </if>
+            <if test="params.tuanduiId != null and params.tuanduiId != ''">
+                and (
+                    a.tuandui_id = #{params.tuanduiId}
+                )
+            </if>
+            <if test=" params.zhuangxiuName != '' and params.zhuangxiuName != null and params.zhuangxiuName != 'null' ">
+                and a.zhuangxiu_name like CONCAT('%',#{params.zhuangxiuName},'%')
+            </if>
+            <if test="params.zhuangxiuTypes != null and params.zhuangxiuTypes != ''">
+                and a.zhuangxiu_types = #{params.zhuangxiuTypes}
+            </if>
+            <if test="params.zhuangxiuNewMoneyStart != null ">
+                <![CDATA[  and a.zhuangxiu_new_money >= #{params.zhuangxiuNewMoneyStart}   ]]>
+            </if>
+            <if test="params.zhuangxiuNewMoneyEnd != null ">
+                <![CDATA[  and a.zhuangxiu_new_money <= #{params.zhuangxiuNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.zhuangxiuClicknumStart != null and params.zhuangxiuClicknumStart != ''">
+                <![CDATA[  and a.zhuangxiu_clicknum >= #{params.zhuangxiuClicknumStart}   ]]>
+            </if>
+            <if test="params.zhuangxiuClicknumEnd != null and params.zhuangxiuClicknumEnd != ''">
+                <![CDATA[  and a.zhuangxiu_clicknum <= #{params.zhuangxiuClicknumEnd}   ]]>
+            </if>
+             <if test="params.zhuangxiuClicknum != null and params.zhuangxiuClicknum != ''">
+                and a.zhuangxiu_clicknum = #{params.zhuangxiuClicknum}
+             </if>
+            <if test=" params.zhuangxiuContent != '' and params.zhuangxiuContent != null and params.zhuangxiuContent != 'null' ">
+                and a.zhuangxiu_content like CONCAT('%',#{params.zhuangxiuContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null and params.shangxiaTypes != ''">
+                and a.shangxia_types = #{params.shangxiaTypes}
+            </if>
+            <if test="params.zhuangxiuDeleteStart != null and params.zhuangxiuDeleteStart != ''">
+                <![CDATA[  and a.zhuangxiu_delete >= #{params.zhuangxiuDeleteStart}   ]]>
+            </if>
+            <if test="params.zhuangxiuDeleteEnd != null and params.zhuangxiuDeleteEnd != ''">
+                <![CDATA[  and a.zhuangxiu_delete <= #{params.zhuangxiuDeleteEnd}   ]]>
+            </if>
+             <if test="params.zhuangxiuDelete != null and params.zhuangxiuDelete != ''">
+                and a.zhuangxiu_delete = #{params.zhuangxiuDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断装修队的id不为空 -->
+            <if test=" params.tuanduiIdNotNull != '' and params.tuanduiIdNotNull != null and params.tuanduiIdNotNull != 'null' ">
+                and a.tuandui_id IS NOT NULL
+            </if>
+            <if test=" params.tuanduiName != '' and params.tuanduiName != null and params.tuanduiName != 'null' ">
+                and tuandui.tuandui_name like CONCAT('%',#{params.tuanduiName},'%')
+            </if>
+            <if test=" params.tuanduiPhone != '' and params.tuanduiPhone != null and params.tuanduiPhone != 'null' ">
+                and tuandui.tuandui_phone like CONCAT('%',#{params.tuanduiPhone},'%')
+            </if>
+            <if test=" params.tuanduiEmail != '' and params.tuanduiEmail != null and params.tuanduiEmail != 'null' ">
+                and tuandui.tuandui_email like CONCAT('%',#{params.tuanduiEmail},'%')
+            </if>
+            <if test=" params.tuanduiContent != '' and params.tuanduiContent != null and params.tuanduiContent != 'null' ">
+                and tuandui.tuandui_content like CONCAT('%',#{params.tuanduiContent},'%')
+            </if>
+            <if test="params.tuanduiDeleteStart != null  and params.tuanduiDeleteStart != '' ">
+                <![CDATA[  and tuandui.tuandui_delete >= #{params.tuanduiDeleteStart}   ]]>
+            </if>
+            <if test="params.tuanduiDeleteEnd != null  and params.tuanduiDeleteEnd != '' ">
+                <![CDATA[  and tuandui.tuandui_delete <= #{params.tuanduiDeleteEnd}   ]]>
+            </if>
+            <if test="params.tuanduiDelete != null  and params.tuanduiDelete != '' ">
+                and tuandui.tuandui_delete = #{params.tuanduiDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
